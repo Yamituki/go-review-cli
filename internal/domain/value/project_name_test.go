@@ -2,7 +2,7 @@ package value
 
 import "testing"
 
-// TestNewProjectName 新しいプロジェクト名を生成するテスト用ヘルパー関数。
+// TestNewProjectName 新しいプロジェクト名を生成するテスト
 func TestNewProjectName(t *testing.T) {
 	// テストケース
 	testCases := []struct {

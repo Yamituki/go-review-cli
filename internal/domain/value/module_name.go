@@ -1,6 +1,9 @@
 package value
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ModuleName string
 
@@ -26,25 +29,8 @@ func (m ModuleName) Validate() error {
 	// 例: github.com/user/repo
 
 	// スラッシュで区切られた３つ以上のセグメントをチェック
-	segments := 0
-	inSegment := false
-
-	for _, char := range m {
-		if char == '/' {
-			if inSegment {
-				segments++
-				inSegment = false
-			}
-		} else {
-			inSegment = true
-		}
-	}
-
-	if inSegment {
-		segments++
-	}
-
-	if segments < 3 {
+	segments := strings.Split(string(m), "/")
+	if len(segments) < 3 {
 		return fmt.Errorf("モジュール名は少なくとも3つのセグメントを含む必要があります (例: github.com/user/repo)")
 	}
 

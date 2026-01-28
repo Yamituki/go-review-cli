@@ -23,7 +23,7 @@ func (p ProjectName) String() string {
 // Validate プロジェクト名のバリデーションを行います。
 func (p ProjectName) Validate() error {
 	// 一文字以上であることを確認
-	if len(p) < 1 {
+	if len(p) == 0 {
 		return fmt.Errorf("プロジェクト名は1文字以上である必要があります")
 	}
 
