@@ -23,9 +23,7 @@ func init() {
 		Short:   "プロジェクトスキャフォールディングツール",
 		Long:    `go-review-cli は、開発者がプロジェクトを素早く立ち上げるための対話型CLIツールです。統一されたプロジェクト構造、Git Flow管理、カスタムテンプレートサポートを提供します。`,
 		Version: version.GetVersion(),
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
-		},
+		Run:     func(cmd *cobra.Command, args []string) {},
 	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "設定ファイルのパス（デフォルトは ~/.go-review-cli/config.yaml）")
@@ -36,6 +34,7 @@ func init() {
 // Execute はルートコマンドを実行します。
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
