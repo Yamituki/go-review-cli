@@ -2,38 +2,41 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/Yamituki/go-review-cli/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-/**
- * これらの変数はコマンドラインフラグの値を保持します。
- * rootCmd ルートコマンドを保持します。
- * cfgFile 設定ファイルのパスを保持します。
- * verbose 詳細出力フラグを保持します。
- */
 var (
 	rootCmd *cobra.Command
 	cfgFile string
 	verbose bool
 )
 
-// init 関数はパッケージの初期化を行います。
 func init() {
+	cobra.OnInitialize(initConfig)
+
 	rootCmd = &cobra.Command{
 		Use:     "go-review-cli",
-		Short:   "Go Review CLI はコードレビューを支援するコマンドラインツールです。",
-		Long:    `Go Review CLI は、Go言語で書かれたコードのレビューを効率化するための多機能なコマンドラインツールです。`,
+		Short:   "プロジェクトスキャフォールディングツール",
+		Long:    `go-review-cli は、開発者がプロジェクトを素早く立ち上げるための対話型CLIツールです。統一されたプロジェクト構造、Git Flow管理、カスタムテンプレートサポートを提供します。`,
 		Version: version.GetVersion(),
+		Run: func(cmd *cobra.Command, args []string) {
+			cmd.Help()
+		},
 	}
+
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "設定ファイルのパス（デフォルトは ~/.go-review-cli/config.yaml）")
+
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "詳細な出力を有効にします")
 }
 
 // Execute はルートコマンドを実行します。
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		panic(err)
+		os.Exit(1)
 	}
 }
 
