@@ -15,7 +15,7 @@ type Project struct {
 	Path        string
 }
 
-// NewProject　新なプロジェクトエンティティを生成する
+// NewProject　新たなプロジェクトエンティティを生成する
 func NewProject(
 	name string,
 	projectType string,
@@ -49,6 +49,13 @@ func NewProject(
 		return nil, err
 	}
 
+	// Typeがapiの場合、Frameworkは必須
+	if projectTypeValue == value.ProjectTypeAPI && frameworkValue == nil {
+		return nil, fmt.Errorf("フレームワークは必須です")
+	} else if projectTypeValue != value.ProjectTypeAPI && frameworkValue != nil {
+		return nil, fmt.Errorf("フレームワークは不要です")
+	}
+
 	p := &Project{
 		Name:        projectName,
 		Type:        projectTypeValue,
@@ -58,12 +65,10 @@ func NewProject(
 		Path:        path,
 	}
 
-	// Typeがapiの場合、Frameworkは必須
-	if projectTypeValue == value.ProjectTypeAPI && frameworkValue == nil {
-		return nil, fmt.Errorf("フレームワークは必須です")
-	} else if projectTypeValue != value.ProjectTypeAPI && frameworkValue != nil {
-		return nil, fmt.Errorf("フレームワークは不要です")
-	}
-
 	return p, nil
+}
+
+// Validate プロジェクトエンティティのバリデーションを行う
+func (p *Project) Validate() error {
+	return nil
 }

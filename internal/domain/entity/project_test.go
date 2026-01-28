@@ -49,6 +49,19 @@ func TestNewProject(t *testing.T) {
 		},
 
 		{
+			name: "Microserviceタイプでフレームワークが空文字の場合、正常にプロジェクトが生成される",
+			input: input{
+				Name:        "my-microservice-project",
+				Type:        "microservice",
+				Framework:   "",
+				Module:      "github.com/user/my-microservice-project",
+				Description: "自分のマイクロサービスプロジェクトです",
+				Path:        "/path/to/my-microservice-project",
+			},
+			wantErr: false,
+		},
+
+		{
 			name: "APIタイプでフレームワークが空文字の場合、エラーを返す",
 			input: input{
 				Name:        "invalid-project",
@@ -73,6 +86,19 @@ func TestNewProject(t *testing.T) {
 			},
 			wantErr: true,
 		},
+
+		{
+			name: "Microserviceタイプでフレームワークが指定されている場合、エラーを返す",
+			input: input{
+				Name:        "invalid-microservice-project",
+				Type:        "microservice",
+				Framework:   "echo",
+				Module:      "github.com/user/invalid-microservice-project",
+				Description: "無効なマイクロサービスプロジェクトです",
+				Path:        "/path/to/invalid-microservice-project",
+			},
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -87,7 +113,7 @@ func TestNewProject(t *testing.T) {
 			)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("プロジェクトの生成に失敗しました。 got error: %v, want error: %v", err, tt.wantErr)
+				t.Errorf("プロジェクトの生成に失敗しました。 エラーメッセージ: %v", err)
 				return
 			}
 
