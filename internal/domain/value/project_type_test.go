@@ -5,28 +5,25 @@ import "testing"
 // TestNewProjectType 新しい ProjectType を作成するテスト
 func TestNewProjectType(t *testing.T) {
 	// テストケース
-	testCases := []string{
-		// 正常系
-		"api",
-		"cli",
-		"microservice",
-		// 異常系
-		"",
-		"webapp",
+	testCases := []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{"正常: 有効なプロジェクトタイプ 'api'", "api", false},
+		{"正常: 有効なプロジェクトタイプ 'cli'", "cli", false},
+		{"正常: 有効なプロジェクトタイプ 'microservice'", "microservice", false},
+		{"異常: 空文字列", "", true},
+		{"異常: 無効なプロジェクトタイプ 'webapp'", "webapp", true},
 	}
 
-	for i, tc := range testCases {
-		_, err := NewProjectType(tc)
-
-		// 正常系
-		if i < 3 && err != nil {
-			t.Errorf("テストケース %d: 期待されるエラーなし、実際のエラー: %v", i, err)
-		}
-
-		// 異常系
-		if i >= 3 && err == nil {
-			t.Errorf("テストケース %d: 期待されるエラーあり、実際のエラーなし", i)
-		}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewProjectType(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("期待: エラー=%v, 実際: %v", tt.wantErr, err)
+			}
+		})
 	}
 
 }

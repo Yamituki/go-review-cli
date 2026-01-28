@@ -5,25 +5,24 @@ import "testing"
 // TestNewProjectName 新しいプロジェクト名を生成するテスト用ヘルパー関数。
 func TestNewProjectName(t *testing.T) {
 	// テストケース
-	testCases := []string{
-		"my-test-project",  // 正常系
-		"",                 // 空文字列
-		"my_test_project!", // 無効な文字列（特殊文字を含む）
-		"-mytestproject",   // 先頭にハイフンを含む
-		"mytestproject-",   // 末尾にハイフンを含む
+	testCases := []struct {
+		name    string
+		input   string
+		wantErr bool
+	}{
+		{"正常: 有効なプロジェクト名", "my-test-project", false},
+		{"異常: 空文字列", "", true},
+		{"異常: 特殊文字", "my_test_project!", true},
+		{"異常: 先頭ハイフン", "-mytestproject", true},
+		{"異常: 末尾ハイフン", "mytestproject-", true},
 	}
 
-	for i, tc := range testCases {
-		_, err := NewProjectName(tc)
-
-		// 正常系
-		if i == 0 && err != nil {
-			t.Errorf("テストケース %d: 期待されるエラーなし、実際のエラー: %v", i, err)
-		}
-
-		// 異常系
-		if i != 0 && err == nil {
-			t.Errorf("テストケース %d: 期待されるエラーあり、実際のエラーなし", i)
-		}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := NewProjectName(tt.input)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("期待: エラー=%v, 実際: %v", tt.wantErr, err)
+			}
+		})
 	}
 }
