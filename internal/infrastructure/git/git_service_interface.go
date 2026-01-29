@@ -1,10 +1,10 @@
 package git
 
 type GitService interface {
-	// 初期化
+	// Initialize Gitリポジトリを初期化します。
 	Initialize(path string) error
-	// ブランチの作成
+	// CreateBranch Gitブランチを作成します。
 	CreateBranch(path, branchName string) error
-	// コミット
+	// Commit Gitコミットを作成します。
 	Commit(path, message string) error
 }
