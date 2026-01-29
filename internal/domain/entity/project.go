@@ -49,13 +49,6 @@ func NewProject(
 		return nil, err
 	}
 
-	// Typeがapiの場合、Frameworkは必須
-	if projectTypeValue == value.ProjectTypeAPI && frameworkValue == nil {
-		return nil, fmt.Errorf("フレームワークは必須です")
-	} else if projectTypeValue != value.ProjectTypeAPI && frameworkValue != nil {
-		return nil, fmt.Errorf("フレームワークは不要です")
-	}
-
 	p := &Project{
 		Name:        projectName,
 		Type:        projectTypeValue,
@@ -65,10 +58,21 @@ func NewProject(
 		Path:        path,
 	}
 
+	if err := p.Validate(); err != nil {
+		return nil, err
+	}
+
 	return p, nil
 }
 
 // Validate プロジェクトエンティティのバリデーションを行う
 func (p *Project) Validate() error {
+	// Typeがapiの場合、Frameworkは必須
+	if p.Type == value.ProjectTypeAPI && p.Framework == nil {
+		return fmt.Errorf("フレームワークは必須です")
+	} else if p.Type != value.ProjectTypeAPI && p.Framework != nil {
+		return fmt.Errorf("フレームワークは不要です")
+	}
+
 	return nil
 }
