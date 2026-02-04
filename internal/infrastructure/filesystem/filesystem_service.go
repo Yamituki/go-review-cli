@@ -22,7 +22,7 @@ func NewAferoFileSystemService() *AferoFileSystemService {
 	}
 }
 
-// CreateDirectory ディレクトリを作成します。
+// CreateDirectory ディレクトリを作成
 func (afs *AferoFileSystemService) CreateDirectory(path string) error {
 	// ディレクトリを作成
 	if err := afs.fs.MkdirAll(path, 0755); err != nil {
@@ -32,7 +32,7 @@ func (afs *AferoFileSystemService) CreateDirectory(path string) error {
 	return nil
 }
 
-// WriteFile ファイルにデータを書き込みます。
+// WriteFile ファイルにデータを書き込む
 func (afs *AferoFileSystemService) WriteFile(path string, content string) error {
 	// ファイルにデータを書き込み
 	if err := afero.WriteFile(afs.fs, path, []byte(content), 0644); err != nil {
@@ -42,7 +42,7 @@ func (afs *AferoFileSystemService) WriteFile(path string, content string) error 
 	return nil
 }
 
-// ReadFile ファイルからデータを読み込みます。
+// ReadFile ファイルからデータを読み込む
 func (afs *AferoFileSystemService) ReadFile(path string) (string, error) {
 	// ファイルからデータを読み込み
 	data, err := afero.ReadFile(afs.fs, path)
@@ -53,7 +53,7 @@ func (afs *AferoFileSystemService) ReadFile(path string) (string, error) {
 	return string(data), nil
 }
 
-// CopyDirectory ディレクトリをコピーします。
+// CopyDirectory ディレクトリをコピー
 func (afs *AferoFileSystemService) CopyDirectory(src, dest string) error {
 	// ディレクトリのコピー元を確認
 	_, err := afs.fs.Stat(src)
@@ -101,6 +101,15 @@ func (afs *AferoFileSystemService) CopyDirectory(src, dest string) error {
 
 	if err != nil {
 		return fmt.Errorf("Aferoファイルシステムサービス: ディレクトリのコピーに失敗しました: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteFile ファイルを削除
+func (afs *AferoFileSystemService) DeleteFile(path string) error {
+	if err := afs.fs.Remove(path); err != nil {
+		return fmt.Errorf("Aferoファイルシステムサービス: ファイルの削除に失敗しました: %w", err)
 	}
 
 	return nil

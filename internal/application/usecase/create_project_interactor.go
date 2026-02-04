@@ -134,6 +134,12 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 			return err
 		}
 
+		// 元の.tmplファイルを削除
+		err = i.fsService.DeleteFile(path)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
