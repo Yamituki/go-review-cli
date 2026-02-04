@@ -31,6 +31,8 @@ func (p *TemplateProcessor) PrepareVariables(project *entity.Project) map[string
 		variables["Framework"] = ""
 	}
 
+	variables["GoVersion"] = "1.21"
+
 	return variables
 }
 

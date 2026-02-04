@@ -63,3 +63,6 @@ tmp/
 config.local.yaml 
 # ローカル開発用の環境変数ファイル
 .env.local 
+
+# CLIのテストの産物
+test-output/
