@@ -1,0 +1,68 @@
+# Binaries　ビルド成果物は環境依存で、リリース時はGitHub Releasesで配布するため、リポジトリには含めない
+# go buildで生成されるバイナリのディレクトリ
+bin/
+# go buildで生成される配布用バイナリのディレクトリ
+dist/
+# Windows実行ファイル 
+*.exe
+# Windowsの一時ファイル
+*.exe~
+# Windowsのダイナミックリンクライブラリ 
+*.dll
+# Linuxの共有オブジェクト 
+*.so 
+# macOSのダイナミックライブラリ
+*.dylib 
+
+# Test binary　Goのテストバイナリでテストコードから生成されるため、リポジトリには含めない
+# go test -c で生成されるテストバイナリ
+*.test 
+
+# Output of the go coverage tool　ローカルでのカバレッジ解析結果はリポジトリに含めない
+# go tool cover で生成される出力ファイル
+*.out 
+# go tool cover で生成されるテキストファイル
+coverage.txt 
+# go tool cover で生成されるHTMLファイル
+coverage.html 
+
+# Go workspace file 　Goのワークスペース設定ファイルは個人ごとに異なるため、リポジトリには含めない
+# go work で生成されるワークスペース設定ファイル
+go.work 
+
+# Dependency directories 　go.mod/go.sumで依存関係を管理しているため、依存関係のディレクトリはリポジトリには含めない
+# go mod vendor で生成される依存関係のディレクトリ
+vendor/ 
+
+# IDE 個人の開発環境設定ファイルはリポジトリには含めない
+# JetBrains系IDEの設定ディレクトリ
+.idea/ 
+# Visual Studio Codeの設定ディレクトリ
+.vscode/ 
+# Vimの一時ファイル
+*.swp 
+# Vimの一時ファイル
+*.swo 
+# Emacsの一時ファイル
+*~ 
+
+# OS os固有のファイルはリポジトリには含めない
+# macOSのFinder設定ファイル
+.DS_Store 
+# Windowsの画像キャッシュファイル
+Thumbs.db 
+
+# Build artifacts その他のビルド成果物
+# ログファイル
+*.log 
+# 一時ファイルディレクトリ
+tmp/ 
+
+# Config (local dev) 開発者ごとの設定ファイルはリポジトリには含めない
+# ローカル開発用の設定ファイル
+config.local.yaml 
+# ローカル開発用の環境変数ファイル
+.env.local 
+
+# CLIのテストの産物
+test-output/
