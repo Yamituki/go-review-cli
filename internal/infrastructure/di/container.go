@@ -3,6 +3,7 @@ package di
 import (
 	"github.com/Yamituki/go-review-cli/internal/application/usecase"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/repository"
 )
 
@@ -16,9 +17,17 @@ func NewContainer() *Container {
 	projectRepo := repository.NewFileSystemProjectRepository()
 	projectGenerator := service.NewProjectGenerator()
 	templateProcessor := service.NewTemplateProcessor()
+	templateRepo := repository.NewFileSystemTemplateRepository()
+	fsService := filesystem.NewAferoFileSystemService()
 
 	return &Container{
-		createProjectUseCase: usecase.NewCreateProjectInteractor(projectRepo, projectGenerator, templateProcessor),
+		createProjectUseCase: usecase.NewCreateProjectInteractor(
+			projectRepo,
+			projectGenerator,
+			templateProcessor,
+			templateRepo,
+			fsService,
+		),
 	}
 }
 

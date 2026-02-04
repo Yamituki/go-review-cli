@@ -29,6 +29,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "設定ファイルのパス（デフォルトは ~/.go-review-cli/config.yaml）")
 
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "詳細な出力を有効にします")
+
+	// 他のコマンドの初期化
+	InitCreateCommand(rootCmd)
 }
 
 // Execute はルートコマンドを実行します。

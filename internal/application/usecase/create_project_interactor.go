@@ -7,12 +7,15 @@ import (
 	"github.com/Yamituki/go-review-cli/internal/domain/entity"
 	"github.com/Yamituki/go-review-cli/internal/domain/repository"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
 )
 
 type CreateProjectInteractor struct {
 	projectRepo       repository.ProjectRepository
 	projectGenerator  *service.ProjectGenerator
 	templateProcessor *service.TemplateProcessor
+	templateRepo      repository.TemplateRepository
+	fsService         filesystem.FileSystemService
 }
 
 // NewCreateProjectInteractor CreateProjectInteractorインスタンスを生成します。
@@ -20,11 +23,15 @@ func NewCreateProjectInteractor(
 	projectRepo repository.ProjectRepository,
 	projectGenerator *service.ProjectGenerator,
 	templateProcessor *service.TemplateProcessor,
+	templateRepo repository.TemplateRepository,
+	fsService filesystem.FileSystemService,
 ) *CreateProjectInteractor {
 	return &CreateProjectInteractor{
 		projectRepo:       projectRepo,
 		projectGenerator:  projectGenerator,
 		templateProcessor: templateProcessor,
+		templateRepo:      templateRepo,
+		fsService:         fsService,
 	}
 }
 
@@ -47,6 +54,20 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 	err = i.projectRepo.Create(projectEntity)
 	if err != nil {
 		return nil, err
+	}
+
+	// ディレクトリ構造を取得
+	structure, err := i.projectGenerator.GenerateStructure(projectEntity)
+	if err != nil {
+		return nil, err
+	}
+
+	// ディレクトリ作成
+	for _, dir := range structure {
+		err := i.fsService.CreateDirectory(dir)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// 成功処理

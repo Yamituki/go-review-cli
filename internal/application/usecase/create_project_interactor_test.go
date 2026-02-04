@@ -7,6 +7,7 @@ import (
 	"github.com/Yamituki/go-review-cli/internal/application/usecase/dto"
 	"github.com/Yamituki/go-review-cli/internal/domain/entity"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
+	"github.com/Yamituki/go-review-cli/internal/domain/value"
 )
 
 type MockProjectRepository struct {
@@ -18,10 +19,52 @@ func (m *MockProjectRepository) Create(project *entity.Project) error {
 	return m.CreateFunc(project)
 }
 
+type MockTemplateRepository struct {
+	GetByTypeFunc func(value.ProjectType) (*entity.Template, error)
+}
+
+// GetByType 指定されたタイプのプロジェクトを取得するモック実装
+func (m *MockTemplateRepository) GetByType(projectType value.ProjectType) (*entity.Template, error) {
+	return m.GetByTypeFunc(projectType)
+}
+
+// List すべてのプロジェクトをリストするモック実装
+func (m *MockTemplateRepository) List() ([]*entity.Template, error) {
+	// モックでは空のリストを返す
+	return nil, nil
+}
+
 // Exists 指定されたパスにプロジェクトが存在するか確認するモック実装
 func (m *MockProjectRepository) Exists(path string) (bool, error) {
 	// モックでは常に存在しないと仮定
 	return false, nil
+}
+
+type MockFileSystemService struct {
+	CreateDirectoryFunc func(path string) error
+}
+
+// CreateDirectory 指定されたパスにディレクトリを作成するモック実装
+func (m *MockFileSystemService) CreateDirectory(path string) error {
+	return m.CreateDirectoryFunc(path)
+}
+
+// WriteFile 指定されたパスにファイルを書き込むモック実装
+func (m *MockFileSystemService) WriteFile(path string, content string) error {
+	// モックでは何もしない
+	return nil
+}
+
+// ReadFile 指定されたパスからファイルを読み込むモック実装
+func (m *MockFileSystemService) ReadFile(path string) (string, error) {
+	// モックでは空の内容を返す
+	return "", nil
+}
+
+// CopyDirectory 指定されたパスにディレクトリをコピーするモック実装
+func (m *MockFileSystemService) CopyDirectory(src, dest string) error {
+	// モックでは何もしない
+	return nil
 }
 
 // TestCreateProjectInteractor_Execute CreateProjectInteractorのExecuteメソッドをテスト
@@ -114,8 +157,20 @@ func TestCreateProjectInteractor_Execute(t *testing.T) {
 			// テンプレートプロセッサーの作成
 			processor := service.NewTemplateProcessor()
 
+			// テンプレートリポジトリの作成
+			templateRepo := &MockTemplateRepository{}
+			templateRepo.GetByTypeFunc = func(projectType value.ProjectType) (*entity.Template, error) {
+				return entity.NewTemplate("test-template", "1.0.0", "test", "go", "cli", "templates/test")
+			}
+
+			// ファイルシステムサービスの作成
+			fsService := &MockFileSystemService{}
+			fsService.CreateDirectoryFunc = func(path string) error {
+				return nil
+			}
+
 			// インスタンス化
-			interactor := NewCreateProjectInteractor(mockRepo, generator, processor)
+			interactor := NewCreateProjectInteractor(mockRepo, generator, processor, templateRepo, fsService)
 
 			// inputデータの準備
 			input := dto.CreateProjectInput{
