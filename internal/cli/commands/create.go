@@ -21,8 +21,8 @@ var (
 	createFramework   string
 )
 
-// init createコマンドを初期化し、rootコマンドに追加する
-func init() {
+// InitCreateCommand createコマンドを初期化してrootコマンドに追加する
+func InitCreateCommand(root *cobra.Command) {
 	createCmd = &cobra.Command{
 		Use:   "create",
 		Short: "新しいプロジェクトを作成",
@@ -45,7 +45,7 @@ func init() {
 	createCmd.Flags().StringVarP(&createFramework, "framework", "f", "", "使用するフレームワーク")
 
 	// rootコマンドにcreateコマンドを追加
-	rootCmd.AddCommand(createCmd)
+	root.AddCommand(createCmd)
 }
 
 // runCreate createコマンドの実行処理
