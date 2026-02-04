@@ -93,6 +93,11 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 
 	// .tmplファイルの処理
 	err = filepath.Walk(projectRoot, func(path string, info fs.FileInfo, err error) error {
+		// エラーチェック
+		if err != nil {
+			return err
+		}
+
 		// ファイルのみを処理
 		if info.IsDir() {
 			return nil
