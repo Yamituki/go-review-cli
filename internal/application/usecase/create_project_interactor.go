@@ -2,6 +2,9 @@ package usecase
 
 import (
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/Yamituki/go-review-cli/internal/application/usecase/dto"
 	"github.com/Yamituki/go-review-cli/internal/domain/entity"
@@ -56,6 +59,12 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 		return nil, err
 	}
 
+	// テンプレートを取得
+	projectTemplate, err := i.templateRepo.GetByType(projectEntity.Type)
+	if err != nil {
+		return nil, err
+	}
+
 	// ディレクトリ構造を取得
 	structure, err := i.projectGenerator.GenerateStructure(projectEntity)
 	if err != nil {
@@ -69,6 +78,55 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 			return nil, err
 		}
 	}
+
+	// テンプレート変数の準備
+	variables := i.templateProcessor.PrepareVariables(projectEntity)
+
+	// プロジェクトルートパスを作成
+	projectRoot := filepath.Join(projectEntity.Path, projectEntity.Name.String())
+
+	// テンプレートディレクトリからファイルをコピー
+	err = i.fsService.CopyDirectory(projectTemplate.Path, projectRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	// .tmplファイルの処理
+	err = filepath.Walk(projectRoot, func(path string, info fs.FileInfo, err error) error {
+		// ファイルのみを処理
+		if info.IsDir() {
+			return nil
+		}
+
+		// .tmplで終わるファイルのみを処理
+		if !strings.HasSuffix(info.Name(), ".tmpl") {
+			return nil
+		}
+
+		// ファイルを読み込む
+		file, err := i.fsService.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// 変数置換
+		processedContent, err := i.templateProcessor.Process(file, variables)
+		if err != nil {
+			return err
+		}
+
+		// 新しいファイル名を決定（.tmplを削除）
+		newFileName := strings.TrimSuffix(info.Name(), ".tmpl")
+		newFilePath := filepath.Join(filepath.Dir(path), newFileName)
+
+		// 新しいファイルに書き込む
+		err = i.fsService.WriteFile(newFilePath, processedContent)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 
 	// 成功処理
 	out := &dto.CreateProjectOutput{
