@@ -67,6 +67,12 @@ func (m *MockFileSystemService) CopyDirectory(src, dest string) error {
 	return nil
 }
 
+// DeleteFile 指定されたパスのファイルを削除するモック実装
+func (m *MockFileSystemService) DeleteFile(path string) error {
+	// モックでは何もしない
+	return nil
+}
+
 type MockGitService struct {
 	InitializeFunc   func(path string) error
 	CreateBranchFunc func(path, branchName string) error
