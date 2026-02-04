@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Yamituki/go-review-cli/internal/application/usecase/dto"
+	"github.com/Yamituki/go-review-cli/internal/cli/prompts"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/di"
 	"github.com/spf13/cobra"
 )
@@ -35,10 +36,6 @@ func InitCreateCommand(root *cobra.Command) {
 	createCmd.Flags().StringVarP(&createType, "type", "t", "", "プロジェクトタイプ")
 	createCmd.Flags().StringVarP(&createModule, "module", "m", "", "モジュール名")
 	createCmd.Flags().StringVarP(&createPath, "path", "p", "", "プロジェクトパス")
-	createCmd.MarkFlagRequired("name")
-	createCmd.MarkFlagRequired("type")
-	createCmd.MarkFlagRequired("module")
-	createCmd.MarkFlagRequired("path")
 
 	// オプションフラグの設定
 	createCmd.Flags().StringVarP(&createDescription, "description", "d", "", "プロジェクトの説明")
@@ -50,6 +47,23 @@ func InitCreateCommand(root *cobra.Command) {
 
 // runCreate createコマンドの実行処理
 func runCreate(cmd *cobra.Command, args []string) error {
+	// 必須フラグが指定されていない場合、対話形式で入力を促す
+	if createName == "" && createType == "" && createModule == "" && createPath == "" {
+		// 対話形式でプロジェクト情報を取得
+		prompt, err := prompts.PromptProjectCreation()
+		if err != nil {
+			return err
+		}
+
+		// 取得した情報を変数にセット
+		createName = prompt.Name
+		createType = prompt.Type
+		createModule = prompt.Module
+		createPath = prompt.Path
+		createDescription = prompt.Description
+		createFramework = prompt.Framework
+	}
+
 	// DIコンテナを作成
 	container := di.NewContainer()
 
