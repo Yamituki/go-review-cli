@@ -4,6 +4,7 @@ import (
 	"github.com/Yamituki/go-review-cli/internal/application/usecase"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/git"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/repository"
 )
 
@@ -13,12 +14,18 @@ type Container struct {
 
 // NewContainer コンテナの新規作成
 func NewContainer() *Container {
-	// UseCaseの初期化
+	// プロジェクトリポジトリの作成
 	projectRepo := repository.NewFileSystemProjectRepository()
+	// プロジェクトジェネレータの作成
 	projectGenerator := service.NewProjectGenerator()
+	// テンプレートプロセッサの作成
 	templateProcessor := service.NewTemplateProcessor()
+	// テンプレートリポジトリの作成
 	templateRepo := repository.NewFileSystemTemplateRepository()
+	// ファイルシステムサービスの作成
 	fsService := filesystem.NewAferoFileSystemService()
+	// GoGitサービスの作成
+	gitService := git.NewGoGitService()
 
 	return &Container{
 		createProjectUseCase: usecase.NewCreateProjectInteractor(
@@ -27,6 +34,7 @@ func NewContainer() *Container {
 			templateProcessor,
 			templateRepo,
 			fsService,
+			gitService,
 		),
 	}
 }

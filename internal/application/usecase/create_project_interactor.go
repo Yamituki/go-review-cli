@@ -11,6 +11,7 @@ import (
 	"github.com/Yamituki/go-review-cli/internal/domain/repository"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/git"
 )
 
 type CreateProjectInteractor struct {
@@ -19,6 +20,7 @@ type CreateProjectInteractor struct {
 	templateProcessor *service.TemplateProcessor
 	templateRepo      repository.TemplateRepository
 	fsService         filesystem.FileSystemService
+	gitService        git.GitService
 }
 
 // NewCreateProjectInteractor CreateProjectInteractorインスタンスを生成します。
@@ -28,6 +30,7 @@ func NewCreateProjectInteractor(
 	templateProcessor *service.TemplateProcessor,
 	templateRepo repository.TemplateRepository,
 	fsService filesystem.FileSystemService,
+	gitService git.GitService,
 ) *CreateProjectInteractor {
 	return &CreateProjectInteractor{
 		projectRepo:       projectRepo,
@@ -35,6 +38,7 @@ func NewCreateProjectInteractor(
 		templateProcessor: templateProcessor,
 		templateRepo:      templateRepo,
 		fsService:         fsService,
+		gitService:        gitService,
 	}
 }
 
@@ -132,6 +136,24 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 
 		return nil
 	})
+
+	// Gitリポジトリの初期化
+	err = i.gitService.Initialize(projectRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	// 初回コミット
+	err = i.gitService.Commit(projectRoot, "🎉 chore: 初回コミット")
+	if err != nil {
+		return nil, err
+	}
+
+	// デベロップブランチの作成
+	err = i.gitService.CreateBranch(projectRoot, "develop")
+	if err != nil {
+		return nil, err
+	}
 
 	// 成功処理
 	out := &dto.CreateProjectOutput{

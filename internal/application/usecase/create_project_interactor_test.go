@@ -67,6 +67,27 @@ func (m *MockFileSystemService) CopyDirectory(src, dest string) error {
 	return nil
 }
 
+type MockGitService struct {
+	InitializeFunc   func(path string) error
+	CreateBranchFunc func(path, branchName string) error
+	CommitFunc       func(path, message string) error
+}
+
+// Initialize 指定されたパスでGitリポジトリを初期化するモック実装
+func (m *MockGitService) Initialize(path string) error {
+	return m.InitializeFunc(path)
+}
+
+// CreateBranch 指定されたパスでGitブランチを作成するモック実装
+func (m *MockGitService) CreateBranch(path, branchName string) error {
+	return m.CreateBranchFunc(path, branchName)
+}
+
+// Commit 指定されたパスでGitコミットを作成するモック実装
+func (m *MockGitService) Commit(path, message string) error {
+	return m.CommitFunc(path, message)
+}
+
 // TestCreateProjectInteractor_Execute CreateProjectInteractorのExecuteメソッドをテスト
 func TestCreateProjectInteractor_Execute(t *testing.T) {
 	// input構造体
@@ -159,18 +180,48 @@ func TestCreateProjectInteractor_Execute(t *testing.T) {
 
 			// テンプレートリポジトリの作成
 			templateRepo := &MockTemplateRepository{}
+
 			templateRepo.GetByTypeFunc = func(projectType value.ProjectType) (*entity.Template, error) {
-				return entity.NewTemplate("test-template", "1.0.0", "test", "go", "cli", "templates/test")
+				return entity.NewTemplate(
+					"test-template",
+					"1.0.0",
+					"test",
+					"go",
+					"cli",
+					"templates/test",
+				)
 			}
 
 			// ファイルシステムサービスの作成
 			fsService := &MockFileSystemService{}
+
 			fsService.CreateDirectoryFunc = func(path string) error {
 				return nil
 			}
 
+			// Gitサービスの作成
+			gitService := &MockGitService{}
+			gitService.InitializeFunc = func(path string) error {
+				return nil
+			}
+
+			gitService.CreateBranchFunc = func(path, branchName string) error {
+				return nil
+			}
+
+			gitService.CommitFunc = func(path, message string) error {
+				return nil
+			}
+
 			// インスタンス化
-			interactor := NewCreateProjectInteractor(mockRepo, generator, processor, templateRepo, fsService)
+			interactor := NewCreateProjectInteractor(
+				mockRepo,
+				generator,
+				processor,
+				templateRepo,
+				fsService,
+				gitService,
+			)
 
 			// inputデータの準備
 			input := dto.CreateProjectInput{
