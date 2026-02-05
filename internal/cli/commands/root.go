@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/repository"
 	"github.com/Yamituki/go-review-cli/pkg/version"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +33,7 @@ func init() {
 
 	// 他のコマンドの初期化
 	InitCreateCommand(rootCmd)
+	InitConfigCommand(rootCmd)
 }
 
 // Execute はルートコマンドを実行します。
@@ -46,6 +48,13 @@ func Execute() {
 func initConfig() {
 	// viper の新しいインスタンスを作成します。
 	v := viper.New()
+
+	// 設定ファイルの有無を確認し、読み込みます。
+	configRepo := repository.NewViperConfigRepository()
+	if err := configRepo.EnsureConfigFile(); err != nil {
+		fmt.Fprintln(os.Stderr, "設定ファイルの作成に失敗しました:", err)
+		os.Exit(1)
+	}
 
 	// Viperで設定ファイル読み込み（~/.go-review-cli/config.yaml）
 	if cfgFile != "" {
