@@ -11,4 +11,6 @@ type FileSystemService interface {
 	CopyDirectory(src, dest string) error
 	// DeleteFile ファイルを削除
 	DeleteFile(path string) error
+	// RenameFile ファイルをリネーム
+	RenameFile(oldPath, newPath string) error
 }

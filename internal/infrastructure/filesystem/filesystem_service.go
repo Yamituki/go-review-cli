@@ -114,3 +114,11 @@ func (afs *AferoFileSystemService) DeleteFile(path string) error {
 
 	return nil
 }
+
+// RenameFile ファイルをリネーム
+func (afs *AferoFileSystemService) RenameFile(oldPath, newPath string) error {
+	if err := afs.fs.Rename(oldPath, newPath); err != nil {
+		return fmt.Errorf("Aferoファイルシステムサービス: ファイルのリネームに失敗しました: %w", err)
+	}
+	return nil
+}
