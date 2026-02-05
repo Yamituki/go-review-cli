@@ -367,7 +367,6 @@ Clean Architectureに基づいた4層構造：
 
 - [要件定義書](docs/requirements.md)
 - [アーキテクチャ設計書](docs/architecture.md)
-- [詳細設計書](docs/detailed_design.md)
 
 ---
 

@@ -1,0 +1,18 @@
+package router
+
+import (
+	"{{.ModuleName}}/internal/handler"
+	"github.com/labstack/echo/v4"
+)
+
+func NewRouter() *echo.Echo {
+	e := echo.New()
+
+	e.GET("/health", handler.Health)
+
+	return e
+}
+
+func Start(e *echo.Echo, addr string) error {
+	return e.Start(addr)
+}

@@ -1,0 +1,19 @@
+package handler
+
+import (
+	"context"
+
+	pb "{{.ModuleName}}/proto"
+)
+
+type Handler struct {
+	pb.UnimplementedHealthServiceServer
+}
+
+func NewHandler() *Handler {
+	return &Handler{}
+}
+
+func (h *Handler) HealthCheck(ctx context.Context, req *pb.HealthRequest) (*pb.HealthResponse, error) {
+	return &pb.HealthResponse{Status: "OK"}, nil
+}
