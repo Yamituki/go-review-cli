@@ -46,9 +46,6 @@ func Execute() {
 
 // initConfig は設定ファイルの初期化を行います。
 func initConfig() {
-	// viper の新しいインスタンスを作成します。
-	v := viper.New()
-
 	// 設定ファイルの有無を確認し、読み込みます。
 	configRepo := repository.NewViperConfigRepository()
 	if err := configRepo.EnsureConfigFile(); err != nil {
@@ -58,14 +55,24 @@ func initConfig() {
 
 	// Viperで設定ファイル読み込み（~/.go-review-cli/config.yaml）
 	if cfgFile != "" {
-		v.SetConfigFile(cfgFile)
+		viper.SetConfigFile(cfgFile)
 	}
 
-	v.SetConfigName("config")
-	v.AddConfigPath(".")
-	v.AddConfigPath("$HOME/.go-review-cli")
+	// ユーザーのホームディレクトリとカレントディレクトリを探索パスに追加
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "ホームディレクトリの取得に失敗しました:", err)
+		os.Exit(1)
+	}
 
-	if err := v.ReadInConfig(); err == nil {
-		fmt.Println("設定ファイルを使用中:", v.ConfigFileUsed())
+	viper.SetConfigName("config")
+	viper.AddConfigPath(".")
+	viper.AddConfigPath(fmt.Sprintf("%s/.go-review-cli", userHome))
+
+	// 環境変数の自動読み込みを有効化
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("設定ファイルを使用中:", viper.ConfigFileUsed())
 	}
 }
