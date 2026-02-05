@@ -10,6 +10,7 @@ import (
 	"github.com/Yamituki/go-review-cli/internal/domain/entity"
 	"github.com/Yamituki/go-review-cli/internal/domain/repository"
 	"github.com/Yamituki/go-review-cli/internal/domain/service"
+	"github.com/Yamituki/go-review-cli/internal/domain/value"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
 	"github.com/Yamituki/go-review-cli/internal/infrastructure/git"
 )
@@ -95,6 +96,9 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 		return nil, err
 	}
 
+	// ファイル処理用の変数
+	var newFileName string
+
 	// .tmplファイルの処理
 	err = filepath.Walk(projectRoot, func(path string, info fs.FileInfo, err error) error {
 		// エラーチェック
@@ -107,9 +111,62 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 			return nil
 		}
 
+		// ファイル名の初期化
+		newFileName = info.Name()
+
 		// .tmplで終わるファイルのみを処理
 		if !strings.HasSuffix(info.Name(), ".tmpl") {
 			return nil
+		}
+
+		// APIタイプのフレームワーク処理
+		if projectEntity.Type == value.ProjectTypeAPI {
+			// ginの場合、.echo.tmplを削除
+			if *projectEntity.Framework == value.FrameworkTypeGin {
+				if strings.HasSuffix(info.Name(), ".echo.tmpl") {
+					// .echo.tmplファイルを削除
+					err = i.fsService.DeleteFile(path)
+					if err != nil {
+						return err
+					}
+					return nil
+				}
+			}
+
+			// echoの場合、.gin.tmplを削除
+			if *projectEntity.Framework == value.FrameworkTypeEcho {
+				if strings.HasSuffix(info.Name(), ".gin.tmpl") {
+					// .gin.tmplファイルを削除
+					err = i.fsService.DeleteFile(path)
+					if err != nil {
+						return err
+					}
+					return nil
+				}
+			}
+
+			// .gin.tmplか.echo.tmplを.tmplにリネーム
+			if strings.HasSuffix(info.Name(), ".gin.tmpl") || strings.HasSuffix(info.Name(), ".echo.tmpl") {
+				// 新しいファイル名を決定（.gin.tmplまたは.echo.tmplを.tmplに置換）
+
+				if strings.HasSuffix(info.Name(), ".gin.tmpl") {
+					newFileName = strings.ReplaceAll(info.Name(), ".gin.tmpl", ".tmpl")
+				} else {
+					newFileName = strings.ReplaceAll(info.Name(), ".echo.tmpl", ".tmpl")
+				}
+
+				newFilePath := filepath.Join(filepath.Dir(path), newFileName)
+
+				// ファイルをリネーム
+				err = i.fsService.RenameFile(path, newFilePath)
+				if err != nil {
+					return err
+				}
+
+				// パスを更新
+				path = newFilePath
+			}
+
 		}
 
 		// ファイルを読み込む
@@ -125,7 +182,7 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 		}
 
 		// 新しいファイル名を決定（.tmplを削除）
-		newFileName := strings.TrimSuffix(info.Name(), ".tmpl")
+		newFileName = strings.TrimSuffix(newFileName, ".tmpl")
 		newFilePath := filepath.Join(filepath.Dir(path), newFileName)
 
 		// 新しいファイルに書き込む

@@ -73,6 +73,12 @@ func (m *MockFileSystemService) DeleteFile(path string) error {
 	return nil
 }
 
+// RenameFile 指定されたパスのファイルをリネームするモック実装
+func (m *MockFileSystemService) RenameFile(oldPath, newPath string) error {
+	// モックでは何もしない
+	return nil
+}
+
 type MockGitService struct {
 	InitializeFunc   func(path string) error
 	CreateBranchFunc func(path, branchName string) error
