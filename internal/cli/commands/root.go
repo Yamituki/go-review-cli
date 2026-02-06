@@ -34,6 +34,7 @@ func init() {
 	// 他のコマンドの初期化
 	InitCreateCommand(rootCmd)
 	InitConfigCommand(rootCmd)
+	InitVersionCommand(rootCmd)
 }
 
 // Execute はルートコマンドを実行します。
