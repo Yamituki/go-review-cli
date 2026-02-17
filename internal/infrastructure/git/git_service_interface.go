@@ -7,4 +7,6 @@ type GitService interface {
 	CreateBranch(path, branchName string) error
 	// Commit Gitコミットを作成します。
 	Commit(path, message string) error
+	// SetupCommitMsgHook Gitコミットメッセージフックを設定します。
+	SetupCommitMsgHook(path string) error
 }

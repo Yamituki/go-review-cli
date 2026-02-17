@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+
+if [ "$COMMIT_SOURCE" = "message" ] || [ "$COMMIT_SOURCE" = "merge" ]; then
+    exit 0
+fi
+
+clear 2>/dev/null || printf '\033[2J\033[H'
+
+echo ""
+echo "╔════════════════════════════════════════════════╗"
+echo "║      コミットタイプを選択してください          ║"
+echo "╚════════════════════════════════════════════════╝"
+echo ""
+echo "  1️⃣  ✨ feat      新機能"
+echo "  2️⃣  🐛 fix       バグ修正"
+echo "  3️⃣  📝 docs      ドキュメント"
+echo "  4️⃣  🎨 style     スタイル"
+echo "  5️⃣  ♻️  refactor  リファクタリング"
+echo "  6️⃣  ⚡️ perf      パフォーマンス"
+echo "  7️⃣  ✅ test      テスト"
+echo "  8️⃣  🔧 chore     その他"
+echo ""
+echo "────────────────────────────────────────────────"
+echo ""
+
+read -p "  番号を入力 [1-8]: " choice < /dev/tty
+echo ""
+
+case $choice in
+    1) PREFIX="✨ feat:" ;;
+    2) PREFIX="🐛 fix:" ;;
+    3) PREFIX="📝 docs:" ;;
+    4) PREFIX="🎨 style:" ;;
+    5) PREFIX="♻️ refactor:" ;;
+    6) PREFIX="⚡️ perf:" ;;
+    7) PREFIX="✅ test:" ;;
+    8) PREFIX="🔧 chore:" ;;
+    *) 
+        echo "  ❌ 無効な選択です"
+        exit 1
+        ;;
+esac
+
+read -p "  タイトル: " title < /dev/tty
+echo ""
+
+if [ -z "$title" ]; then
+    echo "  ❌ タイトルが空です"
+    exit 1
+fi
+
+read -p "  詳細を追加しますか？ [y/N]: " add_details < /dev/tty
+echo ""
+
+printf "%s %s\n" "$PREFIX" "$title" > "$COMMIT_MSG_FILE"
+
+if [[ "$add_details" =~ ^[Yy]$ ]]; then
+    echo "" >> "$COMMIT_MSG_FILE"
+    echo "  📝 詳細を入力してください（空行で終了）:"
+    echo ""
+    
+    while IFS= read -r line < /dev/tty; do
+        if [ -z "$line" ]; then
+            break
+        fi
+        echo "- $line" >> "$COMMIT_MSG_FILE"
+    done
+    
+    echo ""
+    echo "  ✅ 詳細を追加しました"
+fi
+
+echo ""
+echo "  ✅ コミットメッセージを作成しました"
+echo ""
