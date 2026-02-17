@@ -40,13 +40,11 @@ func (m *MockProjectRepository) Exists(path string) (bool, error) {
 	return false, nil
 }
 
-type MockFileSystemService struct {
-	CreateDirectoryFunc func(path string) error
-}
+type MockFileSystemService struct{}
 
 // CreateDirectory 指定されたパスにディレクトリを作成するモック実装
 func (m *MockFileSystemService) CreateDirectory(path string) error {
-	return m.CreateDirectoryFunc(path)
+	return nil
 }
 
 // WriteFile 指定されたパスにファイルを書き込むモック実装
@@ -80,24 +78,26 @@ func (m *MockFileSystemService) RenameFile(oldPath, newPath string) error {
 }
 
 type MockGitService struct {
-	InitializeFunc   func(path string) error
-	CreateBranchFunc func(path, branchName string) error
-	CommitFunc       func(path, message string) error
 }
 
 // Initialize 指定されたパスでGitリポジトリを初期化するモック実装
 func (m *MockGitService) Initialize(path string) error {
-	return m.InitializeFunc(path)
+	return nil
 }
 
 // CreateBranch 指定されたパスでGitブランチを作成するモック実装
 func (m *MockGitService) CreateBranch(path, branchName string) error {
-	return m.CreateBranchFunc(path, branchName)
+	return nil
 }
 
 // Commit 指定されたパスでGitコミットを作成するモック実装
 func (m *MockGitService) Commit(path, message string) error {
-	return m.CommitFunc(path, message)
+	return nil
+}
+
+// SetupCommitMsgHook 指定されたパスでGitコミットメッセージフックを設定するモック実装
+func (m *MockGitService) SetupCommitMsgHook(path string) error {
+	return nil
 }
 
 // TestCreateProjectInteractor_Execute CreateProjectInteractorのExecuteメソッドをテスト
@@ -207,23 +207,8 @@ func TestCreateProjectInteractor_Execute(t *testing.T) {
 			// ファイルシステムサービスの作成
 			fsService := &MockFileSystemService{}
 
-			fsService.CreateDirectoryFunc = func(path string) error {
-				return nil
-			}
-
 			// Gitサービスの作成
 			gitService := &MockGitService{}
-			gitService.InitializeFunc = func(path string) error {
-				return nil
-			}
-
-			gitService.CreateBranchFunc = func(path, branchName string) error {
-				return nil
-			}
-
-			gitService.CommitFunc = func(path, message string) error {
-				return nil
-			}
 
 			// インスタンス化
 			interactor := NewCreateProjectInteractor(

@@ -2,7 +2,10 @@ package git
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/Yamituki/go-review-cli/internal/templates"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -75,6 +78,39 @@ func (g *GoGitService) Commit(path, message string) error {
 	_, err = worktree.Commit(message, &git.CommitOptions{})
 	if err != nil {
 		return fmt.Errorf("Gitサービス: コミットエラー: %w", err)
+	}
+
+	return nil
+}
+
+// SetupCommitMsgHook Gitコミットメッセージフックを設定します。
+func (g *GoGitService) SetupCommitMsgHook(path string) error {
+	// パスを確認
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return fmt.Errorf("Gitサービス: 指定パスが存在しません: %s", path)
+	}
+
+	// フックディレクトリのパスを作成
+	hookDir := filepath.Join(path, ".git", "hooks")
+
+	// コピー先のディレクトリを作成
+	if _, err := os.Stat(hookDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(hookDir, 0755); err != nil {
+			return fmt.Errorf("Gitサービス: フックディレクトリ作成エラー: %w", err)
+		}
+	}
+
+	// prepare-commit-msgフックのパスを作成
+	hookPath := filepath.Join(hookDir, "prepare-commit-msg")
+
+	// フックファイルを書き込み
+	if err := os.WriteFile(hookPath, []byte(templates.PrepareCommitMsgHook), 0755); err != nil {
+		return fmt.Errorf("Gitサービス: フックファイル書き込みエラー: %w", err)
+	}
+
+	// 実行権限chmod+xを設定
+	if err := os.Chmod(hookPath, 0755); err != nil {
+		return fmt.Errorf("Gitサービス: フックファイル権限設定エラー: %w", err)
 	}
 
 	return nil

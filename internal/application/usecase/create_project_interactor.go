@@ -218,6 +218,12 @@ func (i *CreateProjectInteractor) Execute(input dto.CreateProjectInput) (*dto.Cr
 		return nil, err
 	}
 
+	// コミットメッセージフックの設定
+	err = i.gitService.SetupCommitMsgHook(projectRoot)
+	if err != nil {
+		return nil, err
+	}
+
 	// 成功処理
 	out := &dto.CreateProjectOutput{
 		Success:     true,
