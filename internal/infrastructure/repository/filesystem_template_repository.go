@@ -8,6 +8,7 @@ import (
 
 	"github.com/Yamituki/go-review-cli/internal/domain/entity"
 	"github.com/Yamituki/go-review-cli/internal/domain/value"
+	"github.com/Yamituki/go-review-cli/internal/infrastructure/filesystem"
 )
 
 type FileSystemTemplateRepository struct{}
@@ -68,6 +69,35 @@ func (r *FileSystemTemplateRepository) List() ([]*entity.Template, error) {
 		templates = append(templates, template)
 	}
 
+	// カスタムテンプレートの一覧を取得
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("ファイルシステムテンプレートリポジトリ: ホームディレクトリの取得に失敗しました: %w", err)
+	}
+
+	customTemplatesDir := filepath.Join(homeDir, ".go-review-cli", "templates")
+
+	entries, err := os.ReadDir(customTemplatesDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return templates, nil // ディレクトリ未作成の場合はスキップ
+		}
+
+		return nil, fmt.Errorf("ファイルシステムテンプレートリポジトリ: カスタムテンプレートディレクトリの読み取りに失敗しました: %w", err)
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			templateName := entry.Name()
+			templatePath := filepath.Join(customTemplatesDir, templateName)
+			template, err := entity.NewTemplate(templateName, "1.0.0", "User-defined template", "go", templateName, templatePath)
+			if err != nil {
+				return nil, fmt.Errorf("ファイルシステムテンプレートリポジトリ: カスタムテンプレートの生成に失敗しました: %w", err)
+			}
+			templates = append(templates, template)
+		}
+	}
+
 	return templates, nil
 }
 
@@ -103,6 +133,53 @@ func (r *FileSystemTemplateRepository) GetByName(name string) (*entity.Template,
 	}
 
 	return template, nil
+}
+
+// Add 新しいテンプレートを追加
+func (r *FileSystemTemplateRepository) Add(name, sourcePath string) error {
+	// テンプレート名プレフィックス処理
+	templateName := r.normalizeTemplateName(name)
+
+	// 組み込みテンプレートかどうかを判断
+	if isbuiltin := r.IsBuiltin(name); isbuiltin {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: 組み込みテンプレートは追加できません: %s", name)
+	}
+
+	// カスタムテンプレートと同名チェック
+	exists, err := r.customTemplateExists(templateName)
+	if err != nil {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: テンプレートの存在チェックに失敗しました: %w", err)
+	}
+
+	if exists {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: 同名のテンプレートが既に存在します: %s", name)
+	}
+
+	// テンプレートソースパスの存在チェック
+	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: テンプレートパスが存在しません: %s", sourcePath)
+	}
+
+	// カスタムテンプレートのパスを取得
+	templatePath, err := r.getCustomTemplatePath(templateName)
+	if err != nil {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: カスタムテンプレートのパスの取得に失敗しました: %w", err)
+	}
+
+	// テンプレートパスのディレクトリを作成
+	if err := os.MkdirAll(filepath.Dir(templatePath), os.ModePerm); err != nil {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: テンプレートディレクトリの作成に失敗しました: %w", err)
+	}
+
+	// ファイルシステムを取得
+	fsService := filesystem.NewAferoFileSystemService()
+
+	// テンプレートをコピー
+	if err := fsService.CopyDirectory(sourcePath, templatePath); err != nil {
+		return fmt.Errorf("ファイルシステムテンプレートリポジトリ: テンプレートのコピーに失敗しました: %w", err)
+	}
+
+	return nil
 }
 
 // Remove テンプレートを削除します（組み込みテンプレートは削除できません）。
