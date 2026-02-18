@@ -10,4 +10,10 @@ type TemplateRepository interface {
 	GetByType(projectType value.ProjectType) (*entity.Template, error)
 	// List 利用可能なテンプレートの一覧を取得する
 	List() ([]*entity.Template, error)
+	// GetByName 指定された名前のテンプレートを取得する
+	GetByName(name string) (*entity.Template, error)
+	// Remove 指定されたテンプレートを削除する
+	Remove(name string) error
+	// IsBuiltin 指定されたテンプレートが組み込みテンプレートかどうかを判断する
+	IsBuiltin(name string) bool
 }
