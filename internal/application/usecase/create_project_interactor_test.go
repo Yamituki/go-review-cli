@@ -34,6 +34,30 @@ func (m *MockTemplateRepository) List() ([]*entity.Template, error) {
 	return nil, nil
 }
 
+// GetByName 指定された名前のプロジェクトを取得するモック実装
+func (m *MockTemplateRepository) GetByName(name string) (*entity.Template, error) {
+	// モックでは常に存在しないと仮定
+	return nil, nil
+}
+
+// Add 新しいプロジェクトを追加するモック実装
+func (m *MockTemplateRepository) Add(name, sourcePath string) error {
+	// モックでは何もしない
+	return nil
+}
+
+// Remove 指定された名前のプロジェクトを削除するモック実装
+func (m *MockTemplateRepository) Remove(name string) error {
+	// モックでは何もしない
+	return nil
+}
+
+// IsBuiltin 指定された名前のプロジェクトが組み込みテンプレートかどうかを判断するモック実装
+func (m *MockTemplateRepository) IsBuiltin(name string) bool {
+	// モックでは常に組み込みテンプレートでないと仮定
+	return false
+}
+
 // Exists 指定されたパスにプロジェクトが存在するか確認するモック実装
 func (m *MockProjectRepository) Exists(path string) (bool, error) {
 	// モックでは常に存在しないと仮定
