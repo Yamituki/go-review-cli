@@ -12,6 +12,7 @@ import (
 type Container struct {
 	createProjectUseCase usecase.CreateProjectUseCase
 	configRepository     domainRepository.ConfigRepository
+	templateRepository   domainRepository.TemplateRepository
 }
 
 // NewContainer コンテナの新規作成
@@ -41,7 +42,8 @@ func NewContainer() *Container {
 			fsService,
 			gitService,
 		),
-		configRepository: configRepository,
+		configRepository:   configRepository,
+		templateRepository: templateRepo,
 	}
 }
 
@@ -53,4 +55,9 @@ func (c *Container) GetCreateProjectUseCase() usecase.CreateProjectUseCase {
 // GetConfigRepository ConfigRepositoryの取得
 func (c *Container) GetConfigRepository() domainRepository.ConfigRepository {
 	return c.configRepository
+}
+
+// GetTemplateRepository TemplateRepositoryの取得
+func (c *Container) GetTemplateRepository() domainRepository.TemplateRepository {
+	return c.templateRepository
 }
