@@ -18,51 +18,18 @@
 - 🎯 **統一された構造**: Clean Architectureに基づいた一貫性のある設計
 - 🔧 **Git Flow統合**: ブランチ戦略とConventional Commits対応
 - 🎨 **カスタマイズ可能**: 独自のテンプレート追加が可能
-- 🌐 **多言語対応準備**: Go以外の言語にも拡張可能な設計
 - 💡 **対話型UI**: 使いやすいインタラクティブプロンプト
 
 ---
 
-## 🎯 ユースケース
-
-### プロジェクト立ち上げの時間短縮
-従来30分かかっていたプロジェクトセットアップが5秒で完了
-
-### チーム開発の統一化
-全プロジェクトで同じ構造を採用し、新規メンバーのオンボーディングを加速
-
-### 将来のマイクロサービス基盤
-複数の言語・フレームワークで統一されたサービスを生成可能
-
----
-
 ## 📦 インストール
-
-### バイナリから（推奨）
-
-```bash
-# 最新版をダウンロード
-curl -L https://github.com/Yamituki/go-review-cli/releases/latest/download/go-review-cli-$(uname -s)-$(uname -m) -o go-review-cli
-
-# 実行権限を付与
-chmod +x go-review-cli
-
-# パスに追加
-sudo mv go-review-cli /usr/local/bin/
-```
-
-### go installから
-
-```bash
-go install github.com/Yamituki/go-review-cli@latest
-```
 
 ### ソースからビルド
 
 ```bash
 git clone https://github.com/Yamituki/go-review-cli.git
 cd go-review-cli
-make build
+go build -o bin/go-review-cli cmd/go-review-cli/main.go
 ```
 
 ---
@@ -105,9 +72,7 @@ my-api/
 ├── docs/
 ├── .gitignore
 ├── go.mod
-├── Makefile
-├── README.md
-└── .env.example
+└── README.md
 ```
 
 ---
@@ -150,51 +115,42 @@ go-review-cli template list
 
 **出力例**:
 ```
-Available Templates:
-  [built-in] go-api          - Go RESTful API
-  [built-in] go-cli          - Go CLI Tool
-  [built-in] go-microservice - Go gRPC Microservice
-  [custom]   my-template     - My custom template
+利用可能なテンプレート:
+  [built-in] go-api               - Go RESTful API template
+  [built-in] go-cli               - Go CLI tool template
+  [built-in] go-microservice      - Go microservice template
+  [custom]   my-template          - User-defined template
+```
+
+#### テンプレート詳細表示
+
+```bash
+go-review-cli template show go-api
 ```
 
 #### カスタムテンプレート追加
 
+任意のディレクトリをカスタムテンプレートとして追加できます。  
+追加したテンプレートは `~/.go-review-cli/templates/[name]` にコピーされます。
+
 ```bash
-go-review-cli template add my-template /path/to/template
+go-review-cli template add my-template /path/to/template-dir
 ```
 
-**テンプレート構造**:
-```
-my-template/
-├── template.yaml          # メタデータ
-├── files/                 # テンプレートファイル
-│   ├── cmd/
-│   ├── internal/
-│   └── ...
-└── README.md
-```
-
-**template.yaml 例**:
-```yaml
-name: my-template
-version: 1.0.0
-description: My custom template
-language: go
-type: api
-variables:
-  - name: ProjectName
-    description: Project name
-    required: true
-  - name: ModuleName
-    description: Go module name
-    required: true
-```
+**制約**:
+- 組み込みテンプレート（go-api, go-cli, go-microservice）と同名は追加不可
+- 同名のカスタムテンプレートが既に存在する場合は追加不可
 
 #### テンプレート削除
 
 ```bash
 go-review-cli template remove my-template
+# エイリアス: rm, delete
 ```
+
+**制約**:
+- 組み込みテンプレートは削除不可
+- 削除前に確認プロンプトが表示される
 
 ---
 
@@ -234,7 +190,7 @@ go-review-cli config reset
 プロジェクト生成時に自動的に：
 - Git リポジトリを初期化
 - `main` と `develop` ブランチを作成
-- Conventional Commits対応のGit Hooksを設定
+- Conventional Commits対応のGit Hooksを設定（prepare-commit-msg）
 - 初回コミットを作成（`🎉 chore: Initial commit`）
 
 #### Git Hooks
@@ -242,21 +198,18 @@ go-review-cli config reset
 コミット時に対話型でプレフィックスを選択：
 
 ```
-🎯 コミットタイプを選択:
-  1) ✨ feat: 新機能
-  2) 🐛 fix: バグ修正
-  3) 📝 docs: ドキュメント
-  4) 🎨 style: フォーマット
-  5) ♻️ refactor: リファクタリング
-  6) ⚡️ perf: パフォーマンス
-  7) ✅ test: テスト
-  8) 🔧 chore: その他
-```
+╔════════════════════════════════════════════════╗
+║      コミットタイプを選択してください          ║
+╚════════════════════════════════════════════════╝
 
-#### Git初期化をスキップ
-
-```bash
-go-review-cli create my-project --no-git
+  1️⃣  ✨ feat      新機能
+  2️⃣  🐛 fix       バグ修正
+  3️⃣  📝 docs      ドキュメント
+  4️⃣  🎨 style     スタイル
+  5️⃣  ♻️  refactor  リファクタリング
+  6️⃣  ⚡️ perf      パフォーマンス
+  7️⃣  ✅ test      テスト
+  8️⃣  🔧 chore     その他
 ```
 
 ---
@@ -290,7 +243,6 @@ ui:
 
 - Go 1.21以上
 - Git 2.0以上
-- Make
 
 ### セットアップ
 
@@ -303,25 +255,13 @@ cd go-review-cli
 go mod download
 
 # ビルド
-make build
+go build -o bin/go-review-cli cmd/go-review-cli/main.go
 
 # テスト実行
-make test
+go test ./...
 
-# ローカルで実行
-go run cmd/go-review-cli/main.go
-```
-
-### Makefileコマンド
-
-```bash
-make build        # ビルド
-make test         # テスト実行
-make test-cover   # カバレッジ付きテスト
-make lint         # リント
-make clean        # クリーンアップ
-make install      # インストール
-make build-all    # 全OS向けビルド
+# リリース用ビルド（バージョン情報埋め込み）
+go build -ldflags "-X github.com/Yamituki/go-review-cli/pkg/version.GitCommit=$(git rev-parse HEAD) -X github.com/Yamituki/go-review-cli/pkg/version.BuildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" -o bin/go-review-cli cmd/go-review-cli/main.go
 ```
 
 ---
@@ -340,8 +280,6 @@ Clean Architectureに基づいた4層構造：
 ┌─────────────▼───────────────────┐
 │   Application Layer (Use Cases) │
 │   - CreateProject                │
-│   - ManageTemplate               │
-│   - ManageConfig                 │
 └─────────────┬───────────────────┘
               │
 ┌─────────────▼───────────────────┐
@@ -379,20 +317,18 @@ Clean Architectureに基づいた4層構造：
 | Interactive UI | [Survey](https://github.com/AlecAivazis/survey) | プロンプト |
 | Git Operations | [go-git](https://github.com/go-git/go-git) | Git操作 |
 | File System | [Afero](https://github.com/spf13/afero) | FS抽象化 |
-| Color Output | [Color](https://github.com/fatih/color) | カラー表示 |
-| Progress Bar | [progressbar](https://github.com/schollz/progressbar) | 進捗表示 |
-| Testing | [Testify](https://github.com/stretchr/testify) | テスト |
 
 ---
 
 ## 🗺️ ロードマップ
 
 ### v1.0.0 ✅
-- [x] Go言語プロジェクトテンプレート
-- [x] Git Flow統合
-- [x] カスタムテンプレート管理
-- [x] 対話型UI
-- [x] 設定管理
+- [x] Go言語プロジェクトテンプレート（API/CLI/Microservice）
+- [x] Git Flow統合（初期化、ブランチ作成、Hooks）
+- [x] カスタムテンプレート管理（list/show/add/remove）
+- [x] 対話型UI（Survey）
+- [x] 設定管理（config get/set/list/reset）
+- [x] versionコマンド
 
 ### v2.0.0 (計画中)
 - [ ] Rust言語対応
@@ -405,7 +341,6 @@ Clean Architectureに基づいた4層構造：
 - [ ] マイクロサービスオーケストレーション
 - [ ] Kubernetes マニフェスト生成
 - [ ] Docker Compose自動生成
-- [ ] サービスメッシュ統合
 
 ---
 
@@ -420,13 +355,6 @@ Clean Architectureに基づいた4層構造：
 3. 変更をCommit (`git commit -m '✨ feat: Add amazing feature'`)
 4. ブランチをPush (`git push origin feature/amazing-feature`)
 5. Pull Requestを作成
-
-### 開発ガイドライン
-
-- Conventional Commitsに従う
-- テストを書く（カバレッジ80%以上）
-- ドキュメントを更新する
-- コードレビューを受ける
 
 ---
 
@@ -454,12 +382,6 @@ Clean Architectureに基づいた4層構造：
 
 ---
 
-## 💡 機能リクエスト
-
-新機能のアイデアがある場合は、[Issues](https://github.com/Yamituki/go-review-cli/issues)で提案してください。
-
----
-
 ## 📄 ライセンス
 
 このプロジェクトは[MITライセンス](LICENSE)の下で公開されています。
@@ -471,31 +393,6 @@ Clean Architectureに基づいた4層構造：
 **闇月**
 
 - GitHub: [@Yamituki](https://github.com/Yamituki)
-
----
-
-## 🙏 謝辞
-
-このプロジェクトは以下のオープンソースプロジェクトに影響を受けています：
-
-- [Cobra](https://github.com/spf13/cobra) - CLI framework
-- [Cookiecutter](https://github.com/cookiecutter/cookiecutter) - Project templates
-- [Yeoman](https://yeoman.io/) - Scaffolding tool
-
----
-
-## 📊 統計
-
-![Lines of Code](https://img.shields.io/tokei/lines/github/Yamituki/go-review-cli)
-![Code Size](https://img.shields.io/github/languages/code-size/Yamituki/go-review-cli)
-![Last Commit](https://img.shields.io/github/last-commit/Yamituki/go-review-cli)
-
----
-
-## 🔗 関連プロジェクト
-
-- [go-review-logagg](https://github.com/Yamituki/go-review-logagg) - ログ集約ツール
-- 今後、マイクロサービスプロジェクトが追加予定
 
 ---
 
