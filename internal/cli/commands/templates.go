@@ -31,6 +31,14 @@ func InitTemplateCommand(root *cobra.Command) {
 		Run:   runTemplatesShow,
 	}
 
+	// テンプレートの追加コマンドを作成
+	templatesAddCommand := &cobra.Command{
+		Use:   "add [テンプレート名] [ソースパス]",
+		Short: "テンプレートを追加",
+		Args:  cobra.ExactArgs(2),
+		Run:   runTemplateAdd,
+	}
+
 	// テンプレートの削除コマンドを作成
 	templatesRemoveCommand := &cobra.Command{
 		Use:     "remove [テンプレート名]",
@@ -43,6 +51,7 @@ func InitTemplateCommand(root *cobra.Command) {
 	// サブコマンドを追加
 	templatesCommand.AddCommand(templatesListCommand)
 	templatesCommand.AddCommand(templatesShowCommand)
+	templatesCommand.AddCommand(templatesAddCommand)
 	templatesCommand.AddCommand(templatesRemoveCommand)
 
 	// テンプレートコマンドをルートコマンドに追加
@@ -74,7 +83,13 @@ func runTemplateList(cmd *cobra.Command, args []string) {
 
 	// テンプレートの一覧を表示
 	for _, template := range templates {
-		cmd.Printf("  [built-in] %-20s - %s\n", template.Name, template.Description)
+		// 組み込みテンプレートかどうかを判断
+		prefix := "[custom]"
+		if templateRepo.IsBuiltin(template.Name) {
+			prefix = "[built-in]"
+		}
+
+		cmd.Printf("  %s %-20s - %s\n", prefix, template.Name, template.Description)
 	}
 }
 
@@ -109,6 +124,33 @@ func runTemplatesShow(cmd *cobra.Command, args []string) {
 	cmd.Printf("タイプ: %s\n", template.Type)
 	cmd.Printf("説明: %s\n", template.Description)
 	cmd.Printf("パス: %s\n", template.Path)
+}
+
+// runTemplateAdd テンプレートを追加する関数
+func runTemplateAdd(cmd *cobra.Command, args []string) {
+	// 引数チェック
+	if len(args) < 2 {
+		cmd.Println("テンプレート名とソースパスを指定してください")
+		return
+	}
+
+	// 名前とソースパスの取得
+	templateName := args[0]
+	sourcePath := args[1]
+
+	// コンテナ取得
+	container := di.NewContainer()
+
+	// リポジトリを取得
+	templateRepo := container.GetTemplateRepository()
+
+	// テンプレートを追加
+	if err := templateRepo.Add(templateName, sourcePath); err != nil {
+		cmd.Printf("テンプレートの追加に失敗しました: %v\n", err)
+		return
+	}
+
+	cmd.Printf("テンプレート '%s' を追加しました\n", templateName)
 }
 
 // runTemplateRemove テンプレートを削除する関数

@@ -12,6 +12,8 @@ type TemplateRepository interface {
 	List() ([]*entity.Template, error)
 	// GetByName 指定された名前のテンプレートを取得する
 	GetByName(name string) (*entity.Template, error)
+	// Add 新しいテンプレートを追加する
+	Add(name, sourcePath string) error
 	// Remove 指定されたテンプレートを削除する
 	Remove(name string) error
 	// IsBuiltin 指定されたテンプレートが組み込みテンプレートかどうかを判断する
